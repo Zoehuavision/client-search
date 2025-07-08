@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator Client Search Commands</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    table { border-collapse: collapse; width: 100%; background-color: #fff; }
+    th, td { border: 1px solid #ddd; padding: 12px; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    tr:hover { background-color: #ddd; }
+    h1 { color: #333; text-align: center; }
+    .search-box { margin-bottom: 20px; text-align: center; }
+    .search-box input, .search-box select { padding: 8px; font-size: 16px; margin-right: 10px; }
+    .copy-btn { margin-left: 10px; padding: 4px 8px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 12px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Generator Client Search Commands (30 Countries)</h1>
+  <div class="search-box">
+    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search keyword..." />
+    <select id="countryFilter" onchange="filterTable()">
+      <option value="">All Countries</option>
+    </select>
+  </div>
+  <table id="clientTable">
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Client Type</th>
+        <th>Google Search Command</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const tableData = [["Uganda", "Diesel Generator Repair", "\"diesel generator repair\" + Kampala OR Uganda site:facebook.com"], ["Uganda", "Spare Parts Suppliers", "\"alternator spare parts supplier\" + Uganda site:facebook.com"], ["Uganda", "Heavy Equipment Services", "\"heavy equipment service\" + Kampala site:facebook.com"], ["Tanzania", "Genset Maintenance", "\"generator maintenance\" + Dar es Salaam site:facebook.com"], ["Tanzania", "Spare Parts Sellers", "\"generator spare parts\" + Tanzania site:facebook.com"], ["Tanzania", "Electrical Contractors", "\"electrical contracting company\" + Tanzania site:facebook.com"], ["Mozambique", "Generator Repair (葡语)", "\"manutenção de geradores\" + Maputo site:facebook.com"], ["Mozambique", "Spare Parts Stores (葡语)", "\"peças de gerador\" + Moçambique site:facebook.com"], ["Mozambique", "Heavy Equipment Services (葡语)", "\"serviços de equipamento pesado\" + Moçambique site:facebook.com"], ["Saudi Arabia", "Diesel Genset Repair (阿语)", "\"صيانة مولدات الديزل\" + \"الرياض\" OR \"جدة\" site:facebook.com"], ["Saudi Arabia", "Generator Parts Dealers (阿语)", "\"قطع غيار مولدات كهربائية\" + السعودية site:facebook.com"], ["Saudi Arabia", "Electrical Contractors (阿语)", "\"شركة مقاولات كهربائية\" + السعودية site:facebook.com"]];
+
+    const tbody = document.querySelector("#clientTable tbody");
+    const countrySet = new Set();
+
+    function renderTable() {
+      tbody.innerHTML = "";
+      tableData.forEach(([country, clientType, command], index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${country}</td>
+          <td>${clientType}</td>
+          <td>
+            <code id="cmd${index}">${command}</code>
+            <button class="copy-btn" onclick="copyCommand('cmd${index}')">Copy</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+        countrySet.add(country);
+      });
+
+      const countryFilter = document.getElementById("countryFilter");
+      if (countryFilter.options.length === 1) {
+        Array.from(countrySet).sort().forEach(country => {
+          const option = document.createElement("option");
+          option.value = country;
+          option.textContent = country;
+          countryFilter.appendChild(option);
+        });
+      }
+    }
+
+    function filterTable() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const selectedCountry = document.getElementById("countryFilter").value;
+      const rows = tbody.getElementsByTagName("tr");
+      for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName("td");
+        const rowText = cells[0].innerText + cells[1].innerText + cells[2].innerText;
+        const countryMatch = !selectedCountry || cells[0].innerText === selectedCountry;
+        rows[i].style.display = rowText.toLowerCase().includes(keyword) && countryMatch ? "" : "none";
+      }
+    }
+
+    function copyCommand(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard:\n" + text);
+      });
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
